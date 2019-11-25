@@ -1,0 +1,263 @@
+<?php
+
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+// @codingStandardsIgnoreFile
+?>
+<?php
+/** @var $block \Magento\Framework\View\Element\Template */
+/** @var $helper \Magento\Search\Helper\Data */
+$myHelper = $this->helper('AHTG1\G1428\Helper\Data');
+$helper = $this->helper(\Magento\Search\Helper\Data::class);
+?>
+<?php if (!$block->getDisplay()) : ?>
+    <div class="block block-search">
+        <div class="block block-title"><strong><?= /* @escapeNotVerified */ __('Search') ?></strong></div>
+        <div class="block block-content">
+            <form class="form minisearch" id="search_mini_form" action="<?= /* @escapeNotVerified */ $helper->getResultUrl() ?>" method="get">
+                <div class="field search">
+                    <label class="label" for="search" data-role="minisearch-label">
+                        <span><?= /* @escapeNotVerified */ __('Search') ?></span>
+                    </label>
+                    <div class="control">
+                        <input id="search" data-mage-init='{"quickSearch":{
+                                "formSelector":"#search_mini_form",
+                                "url":"<?= /* @escapeNotVerified */ $helper->getSuggestUrl() ?>",
+                                "destinationSelector":"#search_autocomplete"}
+                           }' type="text" name="<?= /* @escapeNotVerified */ $helper->getQueryParamName() ?>" value="<?= /* @escapeNotVerified */ $helper->getEscapedQueryText() ?>" placeholder="<?= /* @escapeNotVerified */ __('Search entire store here...') ?>" class="input-text" maxlength="<?= /* @escapeNotVerified */ $helper->getMaxQueryLength() ?>" role="combobox" aria-haspopup="false" aria-autocomplete="both" autocomplete="off" />
+                        <div id="search_autocomplete" class="search-autocomplete"></div>
+                        <?= $block->getChildHtml() ?>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button type="submit" title="<?= $block->escapeHtml(__('Search')) ?>" class="action search">
+                        <span><?= /* @escapeNotVerified */ __('Search') ?></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+<?php else : ?>
+    <!--TODO: No to hide / Yes to show ss-->
+    <div class="block block-search block-search-auto">
+        <div class="block block-title"><strong><?= /* @escapeNotVerified */ __('Search') ?></strong></div>
+        <div class="block block-content">
+            <form class="form minisearch" id="search_mini_form" action="<?= /* @escapeNotVerified */ $helper->getResultUrl() ?>" method="get">
+                <div class="field search">
+                    <label class="label" for="search" data-role="minisearch-label">
+                        <span><?= /* @escapeNotVerified */ __('Search') ?></span>
+                    </label>
+                    <div class="control">
+                        <div id="searchCategories" style="display: none">
+                            <select>
+                                <option value="all">All</option>
+                            </select>
+                        </div>
+                        <input id="search" type="text" name="<?= /* @escapeNotVerified */ $helper->getQueryParamName() ?>" value="<?= /* @escapeNotVerified */ $helper->getEscapedQueryText() ?>" placeholder="<?= /* @escapeNotVerified */ __('') ?>" class="input-text" maxlength="<?= /* @escapeNotVerified */ $helper->getMaxQueryLength() ?>" autocomplete="off" />
+                        <input type="hidden" name="numberProduct" value="<?= $block->getNumber() ?>">
+                        <input type="hidden" name="numberOfrow" value="<?= $block->getNumberOfRow() ?>">
+                    </div>
+                </div>
+                <div class="actions">
+                    <button type="submit" title="<?= $block->escapeHtml(__('Search')) ?>" class="action search">
+                        <span><?= /* @escapeNotVerified */ __('Search') ?></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+<?php endif; ?>
+<script type="text/javascript">
+    require(['jquery', 'domReady!'], function($) {
+        var searchControlElement = $('#search_mini_form .field.search .control').first();
+        searchControlElement.append('<div id="searchAutocomplete"><div class="searchCategory"><div class="title"><b>Categories</b></div><ul></ul></div><div class = "listProduct"></div><button type="submit"><?= /* @escapeNotVerified */ __('View All Product') ?></button></div>');
+        $('#search_autocomplete').remove();
+        $('#search').unbind();
+        $(window).click(function() {
+            $('#searchAutocomplete').hide();
+        });
+        $('.block.block-search').click(function(event) {
+            event.stopPropagation();
+        });
+
+        var numberofrow = $("input[name=numberOfrow]").val();
+        var number = $("input[name=numberProduct]").val();
+        var widthlist = numberofrow*120;
+        var widthrow = widthlist+140;
+
+        $('#search').bind('input', function() {
+            var searchInput = $(this);
+            var searchInputValue = searchInput.val().replace("/^[a-zA-Z0-9 _-]+$/i", "");
+            if (searchInputValue.length >= 3) {
+                url = "<?php echo $this->getAjaxUrl(); ?>";
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: {
+                        query: searchInputValue,
+                        category: $('#searchCategories select').first().val()
+                    },
+                    success: function(data) {
+                        console.log(data);
+                        var searchResultHtml = '';
+                        var size = Object.keys(data[1]).length;
+                        var i = 1;
+                        var r;
+                        if (Number.isInteger(size / numberofrow)) {
+                            r = parseInt(size / numberofrow);
+                        } else {
+                            r = parseInt(size / numberofrow) + 1;
+                        }
+                        for (let k = 1; k <= r; k++) {
+                            searchResultHtml += '<ul>';
+                            for (let j = 1; j <= numberofrow; j++) {
+                                searchResultHtml += '<li data-url="' + data[1][i]['url'] + '">';
+                                searchResultHtml += '<div class="sa-image"><img src="' + data[1][i]['thumbnail'] + '"></div>';
+                                searchResultHtml += '<div class="sa-prop">';
+                                searchResultHtml += '<div class="sa-title"><p>' + data[1][i]['name'] + '</p></div>';
+                                if (data[1][i]['rating']) {
+                                    searchResultHtml += '<div class="sa-rating"><div class="rating-summary"><div class="rating-result" title="' + data[1][i]['rating'] + '%"><span style="width:' + data[1][i]['rating'] + '%"><span>' + data[1][i]['rating'] + '%</span></span></div></div></div>';
+                                }
+                                searchResultHtml += '<div class="sa-price"><p>' + data[1][i]['price'] + '<p></div>';
+                                searchResultHtml += '</div>';
+                                searchResultHtml += '</li>';
+
+                                i++;
+                                if (i > size) {
+                                    break;
+                                }
+                            }
+                            searchResultHtml += '</ul>';
+                            $('#searchAutocomplete .listProduct').first().html(searchResultHtml);
+
+                        }
+
+                        $("#searchAutocomplete .listProduct ul li").on("click", function() {
+                            window.location = $(this).data('url');
+                        });
+                        if (size > 0) {
+                            $('#searchAutocomplete').show();
+                            $('#searchAutocomplete button').show();
+                            $('#searchAutocomplete').css('width', widthrow+'px');
+                            $('#searchAutocomplete .listProduct').css('width', widthlist+'px');
+                            $('#searchAutocomplete').css('left', -(widthrow-250)/2+15+'px');
+                            $('#searchAutocomplete .searchCategory').css('display', 'inline-flex');
+
+                        } else {
+                            $('#searchAutocomplete .listProduct').html(' No Product to show ');
+                            $('#searchAutocomplete').css('width', '250px');
+                            $('#searchAutocomplete .listProduct').css('width', '130px');
+                            $('#searchAutocomplete .searchCategory').css('display', 'none');
+                            $('#searchAutocomplete').css('left', '15px');
+                            $('#searchAutocomplete').show();
+                            $('#searchAutocomplete button').hide();
+                        }
+                    },
+                    error: function(data) {
+                        console.log(data);
+                    }
+                });
+            } else if (searchInputValue.length != 0) {
+                $('#searchAutocomplete .listProduct').html(' Min 3 letters');
+                $('#searchAutocomplete').css('width', '250px');
+                $('#searchAutocomplete').css('left', '15px');
+                $('#searchAutocomplete .listProduct').css('width', '85px');
+                $('#searchAutocomplete .searchCategory').css('display', 'none');
+                $('#searchAutocomplete').show();
+                $('#searchAutocomplete button').hide();
+
+            } else {
+                $('#searchAutocomplete').hide();
+            }
+        });
+        $("#search").on("focus", function() {
+            var searchInput = $(this);
+            var searchInputValue = searchInput.val().replace("/^[a-zA-Z0-9 _-]+$/i", "");
+            if (searchInputValue.length >= 3) {
+                url = "<?php echo $this->getAjaxUrl(); ?>";
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: {
+                        query: searchInputValue,
+                        category: $('#searchCategories select').first().val()
+                    },
+                    success: function(data) {
+                        console.log(data);
+                        var searchResultHtml = '';
+                        var size = Object.keys(data[1]).length;
+                        var i = 1;
+                        var r;
+                        if (Number.isInteger(size / numberofrow)) {
+                            r = parseInt(size / numberofrow);
+                        } else {
+                            r = parseInt(size / numberofrow) + 1;
+                        }
+                        for (let k = 1; k <= r; k++) {
+                            searchResultHtml += '<ul>';
+                            for (let j = 1; j <= numberofrow; j++) {
+                                searchResultHtml += '<li data-url="' + data[1][i]['url'] + '">';
+                                searchResultHtml += '<div class="sa-image"><img src="' + data[1][i]['thumbnail'] + '"></div>';
+                                searchResultHtml += '<div class="sa-prop">';
+                                searchResultHtml += '<div class="sa-title"><p>' + data[1][i]['name'] + '</p></div>';
+                                if (data[1][i]['rating']) {
+                                    searchResultHtml += '<div class="sa-rating"><div class="rating-summary"><div class="rating-result" title="' + data[1][i]['rating'] + '%"><span style="width:' + data[1][i]['rating'] + '%"><span>' + data[1][i]['rating'] + '%</span></span></div></div></div>';
+                                }
+                                searchResultHtml += '<div class="sa-price"><p>' + data[1][i]['price'] + '<p></div>';
+                                searchResultHtml += '</div>';
+                                searchResultHtml += '</li>';
+
+                                i++;
+                                if (i > size) {
+                                    break;
+                                }
+                            }
+                            searchResultHtml += '</ul>';
+                            $('#searchAutocomplete .listProduct').first().html(searchResultHtml);
+
+                        }
+
+                        if (size > 0) {
+                            $('#searchAutocomplete').show();
+                            $('#searchAutocomplete button').show();
+                            $('#searchAutocomplete').css('width', widthrow+'px');
+                            $('#searchAutocomplete .listProduct').css('width', widthlist+'px');
+                            $('#searchAutocomplete').css('left', -(widthrow-250)/2+15+'px');
+                            $('#searchAutocomplete .searchCategory').css('display', 'inline-flex');
+
+                        } else {
+                            $('#searchAutocomplete .listProduct').html('No Product to show ');
+                            $('#searchAutocomplete').css('width', '250px');
+                            $('#searchAutocomplete').css('left', '15px');
+                            $('#searchAutocomplete .listProduct').css('width', '130px');
+                            $('#searchAutocomplete .searchCategory').css('display', 'none');
+                            $('#searchAutocomplete').show();
+                            $('#searchAutocomplete button').hide();
+                        }
+                        $("#searchAutocomplete .listProduct ul li").on("click", function() {
+                            window.location = $(this).data('url');
+                        });
+                    },
+                    error: function(data) {
+                        console.log(data);
+                    }
+                });
+            } else if (searchInputValue.length != 0) {
+                $('#searchAutocomplete .listProduct').html(' Min 3 letters ');
+                $('#searchAutocomplete').css('width', '250px');
+                $('#searchAutocomplete').css('left', '15px');
+                $('#searchAutocomplete .listProduct').css('width', '85px');
+                $('#searchAutocomplete .searchCategory').css('display', 'none');
+                $('#searchAutocomplete').show();
+                $('#searchAutocomplete button').hide();
+
+            } else {
+                $('#searchAutocomplete').hide();
+            }
+        });
+
+    });
+</script>

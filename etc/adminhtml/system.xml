@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="AHTG1" translate="label" sortOrder="12">
+            <label>AHTG1</label>
+        </tab>
+        <section id="g1428" translate="label" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>G1428</label>
+            <tab>AHTG1</tab>
+            <resource>AHTG1_G1428::G1428</resource>
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Search AutoComplete Configuration</label>
+                <field id="yes" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Search AuTo :</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Enable/Disable SearchAutoComplete</comment>
+                </field>
+                <field id="numberproduct" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="1">
+                    <label>Number Product: </label>
+                    <validate>required-entry validate-zero-or-greater validate-number</validate>
+                    <comment>number product show in popup</comment>
+                </field>
+                <field id="productofrow" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="1">
+                    <label>Product of Row: </label>
+                    <validate>required-entry validate-greater-than-zero validate-number</validate>
+                    <comment>number product in a row</comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
