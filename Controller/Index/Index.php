@@ -73,6 +73,21 @@ class Index extends \Magento\Framework\App\Action\Action
             $this->_reviewFactory->create()->getEntitySummary($product, $this->_storeManager->getStore()->getId());
             $productList[$i]['rating'] = $product->getRatingSummary()->getRatingSummary();
             $i++;
+            $categoryIds = $product->getCategoryIds();
+            $category = $this->_categoryFactory->create()->load($categoryIds[0]);
+
+            if ($this->checkCate($categoryList, $category)) {
+                $categoryList[$this->checkCate($categoryList, $category)]['count']++;
+            } else {
+                $categoryList[$j]['name'] = $category->getName();
+                $categoryList[$j]['url'] = $category->getUrl();
+                $categoryList[$j]['count'] = 1;
+                $j++;
+            }
+
+
+
+            // $categoryList[$j - 1]['product'] = $product->getName();
         }
         $data[1] = $productList;
         $data[2] = $categoryList;
@@ -83,6 +98,17 @@ class Index extends \Magento\Framework\App\Action\Action
         }
     }
 
+    public function checkCate(array $List, $cate)
+    {
+        $name = $cate->getName();
+        for ($i = 1; $i <= count($List); $i++) {
+            if ($name == $List[$i]['name']) {
+
+                return $i;
+            }
+        }
+        return false;
+    }
     public function getImage($product, $imageId)
     {
         return $this->_imageBuilder->setProduct($product)
