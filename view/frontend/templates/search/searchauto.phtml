@@ -111,10 +111,13 @@ $helper = $this->helper(\Magento\Search\Helper\Data::class);
                         console.log(data);
                         var searchResultHtml = '';
                         var searchCatetHtml = '';
-                        var size = Object.keys(data[1]).length;
+                        var numproduct = Object.keys(data).length;
+                        if (numproduct > 0) {
+                            var size = Object.keys(data[1]).length;
+                            var sizecate = Object.keys(data[2]).length;
+                        }
                         var i = 1;
                         var r;
-                        var sizecate = Object.keys(data[2]).length;
                         if (Number.isInteger(size / numberofrow)) {
                             r = parseInt(size / numberofrow);
                         } else {
@@ -156,7 +159,12 @@ $helper = $this->helper(\Magento\Search\Helper\Data::class);
                         $("#searchAutocomplete .listProduct ul li").on("click", function() {
                             window.location = $(this).data('url');
                         });
-                        if (size > 0) {
+
+                        $("#searchAutocomplete .searchCategory ul li").on("click", function() {
+                            window.location = $(this).data('url');
+                        });
+
+                        if (numproduct > 0) {
                             $('#searchAutocomplete').show();
                             $('#searchAutocomplete button').show();
                             $('#searchAutocomplete').css('width', widthrow + 'px');
@@ -207,11 +215,13 @@ $helper = $this->helper(\Magento\Search\Helper\Data::class);
                         console.log(data);
                         var searchResultHtml = '';
                         var searchCatetHtml = '';
-                        var size = Object.keys(data[1]).length;
+                        var numproduct = Object.keys(data).length;
+                        if (numproduct > 0) {
+                            var size = Object.keys(data[1]).length;
+                            var sizecate = Object.keys(data[2]).length;
+                        }
                         var i = 1;
                         var r;
-                        var sizecate = Object.keys(data[2]).length;
-
                         if (Number.isInteger(size / numberofrow)) {
                             r = parseInt(size / numberofrow);
                         } else {
@@ -250,7 +260,7 @@ $helper = $this->helper(\Magento\Search\Helper\Data::class);
 
                         }
 
-                        if (size > 0) {
+                        if (numproduct > 0) {
                             $('#searchAutocomplete').show();
                             $('#searchAutocomplete button').show();
                             $('#searchAutocomplete').css('width', widthrow + 'px');
@@ -268,6 +278,9 @@ $helper = $this->helper(\Magento\Search\Helper\Data::class);
                             $('#searchAutocomplete button').hide();
                         }
                         $("#searchAutocomplete .listProduct ul li").on("click", function() {
+                            window.location = $(this).data('url');
+                        });
+                        $("#searchAutocomplete .searchCategory ul li").on("click", function() {
                             window.location = $(this).data('url');
                         });
                     },
